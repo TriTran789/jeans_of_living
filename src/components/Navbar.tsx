@@ -1,64 +1,28 @@
 "use client";
 import React from "react";
-import { IoIosArrowDown } from "react-icons/io";
 import Link from "next/link";
-import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { clickNavbar } from "../../redux/features/navbar/navbarSlice";
 
 type Props = {};
 
 const navItems = [
   { title: "home", address: "/" },
-  {
-    title: "shop",
-    address: "/products",
-    subnav: [
-      { title: "dai", address: "/products/dai" },
-      { title: "ngan", address: "/products/ngan" },
-    ],
-  },
+  { title: "shop", address: "/shop" },
   { title: "about", address: "/about" },
   { title: "jol facebook", address: "/facebook" },
   { title: "jol instagram", address: "/instagram" },
 ];
 
 const Navbar = (props: Props) => {
-  const [dropdown, setDropdown] = useState(false);
+  const navbarState = useSelector((state: any) => state.navbar);
+  const dispatch = useDispatch();
 
   return (
-    <div className="w-full max-md:hidden shadow-nav sticky top-0 z-10 bg-white">
-      <ul className="flex justify-center gap-7 h-[50px]">
-        {navItems.map((item, index) => {
-          if (item.subnav) {
-            return (
-              <div
-                className="flex items-center relative"
-                onMouseEnter={() => setDropdown(true)}
-                onMouseLeave={() => setDropdown(false)}
-                key={index}
-              >
-                <li
-                  className={`uppercase items-center hover:text-red-700 font-Roboto-mono font-[500] flex`}
-                >
-                  <Link href={item.address}>{item.title}</Link>
-                  <IoIosArrowDown />
-                </li>
-                <ul
-                  className={`absolute top-[50px] z-10 flex flex-col bg-white shadow-subnav ${
-                    dropdown ? "block" : "hidden"
-                  }`}
-                >
-                  {item.subnav.map((subItem, index) => (
-                    <li
-                      key={index}
-                      className="uppercase hover:text-red-700 font-Roboto-mono font-[500] min-w-[140px] h-[36px] flex items-center pl-3"
-                    >
-                      <Link href={subItem.address}>{subItem.title}</Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          } else {
+    <>
+      <div className="w-full max-md:hidden shadow-nav sticky top-0 z-10 bg-white">
+        <ul className="flex justify-center gap-7 h-[50px]">
+          {navItems.map((item, index) => {
             return (
               <li
                 key={index}
@@ -67,10 +31,27 @@ const Navbar = (props: Props) => {
                 <Link href={item.address}>{item.title}</Link>
               </li>
             );
-          }
-        })}
-      </ul>
-    </div>
+          })}
+        </ul>
+      </div>
+      <div
+        className={`h-full fixed z-10 top-0 bottom-0 bg-[rgba(0,0,0,0.3)]  w-full ${
+          navbarState.value ? "block" : "hidden"
+        }`}
+        onClick={() => dispatch(clickNavbar(false))}
+      >
+        <ul
+          className="h-full w-[50%] bg-white flex flex-col gap-5 px-4 py-8"
+          onClick={(e: any) => e.stopPropagation()}
+        >
+          {navItems.map((item, index) => (
+            <li key={index} className="uppercase font-[500]" onClick={() => dispatch(clickNavbar(false))}>
+              <Link href={item.address}>{item.title}</Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
   );
 };
 

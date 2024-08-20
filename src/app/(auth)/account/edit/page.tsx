@@ -1,19 +1,26 @@
 "use client";
-import { RiShieldUserLine } from "react-icons/ri";
-import { LuMail } from "react-icons/lu";
-import { TbLock } from "react-icons/tb";
+import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useRegisterMutation } from "../../../../redux/features/auth/authApi";
+import { RiShieldUserLine } from "react-icons/ri";
+import { FaRegAddressBook } from "react-icons/fa";
+import { FiPhone } from "react-icons/fi";
+import { TiCancelOutline } from "react-icons/ti";
+import { useSelector } from "react-redux";
+import { useEditProfileMutation } from "../../../../../redux/features/user/userApi";
 
 type Props = {};
 
-const Page = (props: Props) => {
-  const [formData, setFormData] = useState({});
+function Login(prop: Props) {
+  const [editProfile] = useEditProfileMutation();
+  const { user } = useSelector((state: any) => state.auth);
+  const [formData, setFormData] = useState({
+    lastname: user.lastname as string,
+    firstname: user.firstname as string,
+    address: user.address as string,
+    phone: user.phone as string,
+  });
   const [error, setError] = useState(false);
-  const [register, { isSuccess }] = useRegisterMutation();
-
   const router = useRouter();
 
   const handleChange = (e: any) => {
@@ -23,38 +30,25 @@ const Page = (props: Props) => {
   const handleSubmit = async (e: any) => {
     try {
       e.preventDefault();
-      const res = await register(formData).unwrap();
-      res.success && router.push("login");
+      await editProfile(formData);
+      router.push("/account");
     } catch (error: any) {
-      setError(true)
+      setError(true);
     }
-    
   };
-
-  // const handleSubmit = async (e: any) => {
-  //   e.preventDefault();
-  //   const res = await axios
-  //     .post(`${process.env.NEXT_PUBLIC_SERVER_URI}/registration`, formData)
-  //     .then((res) => res.data)
-  //     .catch((error) => error.response.data);
-  //   if (res.success) {
-  //     router.push("/login");
-  //   } else {
-  //     setError(true);
-  //   }
-  // };
 
   return (
     <div className="w-full flex items-center justify-center">
-      <div className="lg:w-[25%] md:w-[40%] w-[80%] mt-10 shadow-subnav p-4 flex flex-col gap-3">
+      <div className="lg:w-[30%] md:w-[45%] w-[80%] mt-10 shadow-subnav p-4 flex flex-col gap-3">
         <h1 className="uppercase font-Roboto-mono text-[20px] font-[600] flex items-center">
-          Đăng ký
+          Thông tin cá nhân
         </h1>
-        <p className={`${error ? "block" : "hidden"}`}>
-          Email đã tồn tại. Nếu bạn quên mật khẩu, bạn có thể{" "}
-          <Link className="font-[500] text-red-700" href={"/recover"}>
-            thiết lập lại mật khẩu tại đây.
-          </Link>
+        <p
+          className={`${
+            error ? "block" : "hidden"
+          } font-Roboto-mono font-[500]`}
+        >
+          Thông tin không hợp lệ.
         </p>
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <div className="flex">
@@ -66,6 +60,7 @@ const Page = (props: Props) => {
               placeholder="Họ"
               id="lastname"
               className="border-2 border-l-0 w-full pl-4 py-1 focus:outline-none font-Roboto-mono text-[16px]"
+              defaultValue={user.lastname}
               onChange={handleChange}
               required
             />
@@ -80,6 +75,7 @@ const Page = (props: Props) => {
               placeholder="Tên"
               id="firstname"
               className="border-2 border-l-0 w-full pl-4 py-1 focus:outline-none font-Roboto-mono text-[16px]"
+              defaultValue={user.firstname}
               onChange={handleChange}
               required
             />
@@ -87,13 +83,13 @@ const Page = (props: Props) => {
 
           <div className="flex">
             <div className="flex items-center justify-center px-2 bg-[#eee] border-2">
-              <LuMail />
+              <FaRegAddressBook />
             </div>
             <input
-              type="email"
-              placeholder="Mail"
-              id="email"
+              placeholder="Địa chỉ (Số nhà + Tên đường + Quận/Huyện)"
+              id="address"
               className="border-2 border-l-0 w-full pl-4 py-1 focus:outline-none font-Roboto-mono text-[16px]"
+              defaultValue={user.address}
               onChange={handleChange}
               required
             />
@@ -101,27 +97,31 @@ const Page = (props: Props) => {
 
           <div className="flex">
             <div className="flex items-center justify-center px-2 bg-[#eee] border-2">
-              <TbLock />
+              <FiPhone />
             </div>
             <input
-              type="password"
-              placeholder="Mật khẩu"
-              id="password"
+              placeholder="Số điện thoại"
+              id="phone"
               className="border-2 border-l-0 w-full pl-4 py-1 focus:outline-none font-Roboto-mono text-[16px]"
+              defaultValue={user.phone}
               onChange={handleChange}
-              minLength={6}
               required
             />
           </div>
 
           <button className="uppercase bg-[#ba2e34] text-[16px] py-1 hover:text-white">
-            đăng ký
+            cập nhật
           </button>
         </form>
-        <p>Bạn đã có tài khoản? <Link href={'/login'} className="text-red-700 font-[500]"> Đăng nhập</Link></p>
+        <div
+          className="text-red-700 font-[600] hover:cursor-pointer flex items-center"
+          onClick={() => router.push("/account")}
+        >
+          <TiCancelOutline className="text-[24px]" /> Hủy
+        </div>
       </div>
     </div>
   );
-};
+}
 
-export default Page;
+export default Login;
